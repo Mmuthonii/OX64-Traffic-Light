@@ -1,0 +1,56 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          wifi
+# Required-Start:
+# Required-Stop:
+# Default-Start:     S
+# Short-Description: Auto connect Wi-Fi and start web server
+### END INIT INFO
+
+CONF_FILE=/boot/wifi.conf
+IFACE="bleth0"
+MAX_DHCP_RETRIES=5
+STATIC_IP="192.168.0.125"
+NETMASK="255.255.255.0"
+GATEWAY="192.168.0.1"
+
+echo "Starting WiFi connection..."
+
+if [ ! -f "$CONF_FILE" ]; then
+    echo "WiFi config file $CONF_FILE not found!"
+    exit 1
+fi
+
+# Kill any running wpa_supplicant on the interface
+killall wpa_supplicant 2>/dev/null
+
+# Start wpa_supplicant in background with config file
+wpa_supplicant -B -i "$IFACE" -c "$CONF_FILE"
+if [ $? -ne 0 ]; then
+    echo "Failed to start wpa_supplicant"
+    exit 1
+fi
+
+# Wait for WiFi association (adjust sleep if needed)
+sleep 10
+
+# Bring up interface with static IP
+ifconfig "$IFACE" "$STATIC_IP" netmask "$NETMASK" up
+
+# Add default gateway
+route add default gw "$GATEWAY" "$IFACE"
+
+# Check interface IP assignment
+if ip addr show "$IFACE" | grep "inet $STATIC_IP" > /dev/null; then
+    echo "WiFi connected with static IP $STATIC_IP"
+else
+    echo "Failed to configure IP address on $IFACE"
+fi
+
+# Start HTTP server in background
+echo "Starting HTTP server..."
+httpd -f -h /www &
+
+exit 0
+#

@@ -1,0 +1,229 @@
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traffic Light</title>
+  <style>
+    body {
+      background-color: rgb(122, 177, 214);
+      align-items: center;
+
+
+
+    }
+
+    .clouds {
+      width: 300px;
+      height: 200px;
+      position: absolute;
+      top: 50px;
+      left: -150px;
+      animation: cloudsmoving 20s linear infinite;
+      z-index: -1;
+
+    }
+
+@keyframes cloudsmoving {
+  from {
+    left: -150px;
+  }
+  to {
+    left: 100%;
+  }
+}
+
+
+
+
+    .container {
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+    }
+
+    .traffic_pole {
+      width: 30px;
+      height:315px;
+      background-color: rgb(26, 32, 32);
+      border-radius: 5px;
+      margin-bottom: 0px;
+      border: 3px solid rgb(40, 35, 35);
+      box-shadow: 0 0 15px rgb(40, 35, 35);
+
+    }
+
+    .traffic_light {
+
+      width: 120px;
+      height: 400px;
+      background-color: rgb(26, 32, 32);
+      display: flex;
+      flex-direction: column;
+      border-radius: 50px;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      border: 3px solid rgb(40, 35, 35);
+      box-shadow: 0 0 20px rgb(40, 35, 35);
+
+
+    }
+
+    .red,
+    .yellow,
+    .green {
+      background-color: rgb(47, 51, 54);
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      cursor: pointer;
+
+
+    }
+
+    .red.active {
+      background-color: red;
+      box-shadow: 0 0 50px 15px red;
+
+
+    }
+
+    .yellow.active {
+      background-color: yellow;
+      box-shadow: 0 0 50px 15px #ffff00;
+
+
+    }
+
+
+    .green.active {
+      background-color: rgb(11, 172, 11);
+      box-shadow: 0 0 50px 15px green;
+
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <img src="cloud.png" alt="A cloud" class="clouds">
+
+    <div class="clouds"></div>
+
+    <div class="traffic_light">
+
+      <div class="red" id="red"></div>
+      <div class="yellow" id="yellow"></div>
+      <div class="green" id="green"></div>
+    </div>
+    <div class="traffic_pole"></div>
+
+
+ <script>
+  let currentColor = null;
+  let yellowInterval;
+
+  document.querySelectorAll('.traffic_light div').forEach(light =>
+    light.addEventListener('click', () => {
+      if (light.classList.contains('red'))      handleRedClick();
+      else if (light.classList.contains('green')) handleGreenClick();
+      else                                      handleYellowClick();
+    })
+  );
+
+  function clearAll() {
+    clearInterval(yellowInterval);
+    document.querySelectorAll('.traffic_light div')
+            .forEach(l => l.classList.remove('active'));
+  }
+
+  function sendColorToServer(color) {
+      fetch(`/cgi-bin/led_control.cgi?color=${color}`)
+      .then(response => response.text())
+      .then(text => console.log(text))
+      .catch(err => console.error('Error sending color:', err));
+  }
+
+
+  function handleRedClick() {
+    if (currentColor === 'green') {
+      clearAll();
+      const yellow = document.querySelector('.yellow');
+      yellow.classList.add('active');
+      sendColorToServer('yellow');
+
+      setTimeout(() => {
+        yellow.classList.remove('active');
+        document.querySelector('.red').classList.add('active');
+        currentColor = 'red';
+        sendColorToServer('red');
+      }, 1500);
+    } else if (currentColor !== 'red') {
+      clearAll();
+      document.querySelector('.red').classList.add('active');
+      currentColor = 'red';
+      sendColorToServer('red');
+    }
+  }
+
+function handleGreenClick() {
+  if (currentColor === 'red') {
+    clearAll(); // clears intervals & removes active classes
+
+    // Add both red and yellow active classes
+    const red = document.querySelector('.red');
+    const yellow = document.querySelector('.yellow');
+    red.classList.add('active');
+    yellow.classList.add('active');
+
+    sendColorToServer('redyellow');  // Turn on red+yellow LEDs
+
+    setTimeout(() => {
+      // Remove red and yellow classes, add green active class
+      red.classList.remove('active');
+      yellow.classList.remove('active');
+      document.querySelector('.green').classList.add('active');
+
+      currentColor = 'green';
+      sendColorToServer('green');  // Turn on green LED only
+    }, 1500);
+  } else if (currentColor !== 'green') {
+    clearAll();
+    document.querySelector('.green').classList.add('active');
+    currentColor = 'green';
+    sendColorToServer('green');
+  }
+}
+
+
+  function handleYellowClick() {
+    if (currentColor !== 'yellow') {
+      clearAll();
+      const yellow = document.querySelector('.yellow');
+      let isOn = false;
+
+      yellowInterval = setInterval(() => {
+        if (isOn) {
+          sendColorToServer('off');
+          yellow.classList.remove('active');
+        } else {
+          sendColorToServer('yellow');
+          yellow.classList.add('active');
+        }
+        isOn = !isOn;
+      }, 400);
+
+      currentColor = 'yellow';
+    }
+  }
+</script>
+
+
+  </div>
+
+
+
+</body></html>

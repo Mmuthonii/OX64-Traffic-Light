@@ -1,0 +1,37 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          wifi
+# Required-Start:
+# Required-Stop:
+# Default-Start:     S
+# Short-Description: Auto connect Wi-Fi
+### END INIT INFO
+
+CONF_FILE=/boot/wifi.conf
+if [ ! -f "$CONF_FILE" ]; then
+    echo "WiFi config file not found: $CONF_FILE"
+    exit 1
+fi
+
+SSID=$(grep '^SSID=' "$CONF_FILE" | cut -d '=' -f2- | tr -d '\r')
+PASSWORD=$(grep '^PASSWORD=' "$CONF_FILE" | cut -d '=' -f2- | tr -d '\r')
+
+if [ -z "$SSID" ] || [ -z "$PASSWORD" ]; then
+    echo "SSID or PASSWORD missing in $CONF_FILE"
+    exit 1
+fi
+
+echo "Connecting to WiFi SSID: $SSID"
+
+if blctl connect_ap "$SSID" "$PASSWORD"; then
+    if ip link show bleth0 > /dev/null 2>&1; then
+        udhcpc -i bleth0
+    else
+        echo "Network interface bleth0 not found"
+        exit 1
+    fi
+else
+    echo "Failed to connect to WiFi"
+    exit 1
+fi
