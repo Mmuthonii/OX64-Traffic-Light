@@ -4,7 +4,7 @@ Control GPIO LEDs from a web interface using **Buildroot + BusyBox + CGI**.
 
 ---
 
-## 📌 Overview
+##  Overview
 
 This project builds a **minimal Linux system** for the **OX64 BL808** using Buildroot.  
 On boot, the system:
@@ -18,7 +18,7 @@ The LEDs are switched in real time using **GET** requests from the webpage.
 
 ---
 
-## 📁 Project Features
+##  Project Features
 
 - Buildroot-based custom Linux image  
 - Wi-Fi auto-configuration (`/etc/wifi.conf`)  
@@ -29,7 +29,7 @@ The LEDs are switched in real time using **GET** requests from the webpage.
 
 ---
 
-## 🔧 GPIO Mapping
+##  GPIO Mapping
 
 | LED     | GPIO |
 |---------|------|
@@ -39,7 +39,7 @@ The LEDs are switched in real time using **GET** requests from the webpage.
 
 ---
 
-▶️ How to Use
+## How to Use
 
 1.Flash the Buildroot SD card image
 
@@ -56,7 +56,7 @@ The LEDs are switched in real time using **GET** requests from the webpage.
 
 Control LEDs using the web interface
 
-📦 Folder Structure
+## Folder Structure
 /www/
   index.html
   traffic.js
