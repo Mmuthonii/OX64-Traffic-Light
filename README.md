@@ -43,15 +43,15 @@ The LEDs are switched in real time using **GET** requests from the webpage.
 
 1.Flash the Buildroot SD card image
 
-Insert the SD card and boot the OX64
+2.Insert the SD card and boot the OX64
 
-The board automatically connects to Wi-Fi
+3.The board automatically connects to Wi-Fi
 
-Find the OX64 IP address (via router or UART)
+4.Find the OX64 IP address (via router or UART)
 
-Open in your browser:
+5.Open in your browser:
 
-http://<OX64_IP>/
+6.http://<OX64_IP>/
 
 
 Control LEDs using the web interface
